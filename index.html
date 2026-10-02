@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi-API Email Discovery Hub (Hunter & Snov)</title>
+  <title>Snov.io Dedicated Lead Finder Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
@@ -12,8 +12,8 @@
     <!-- Header -->
     <header class="mb-8 border-b pb-4 border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">Email Discovery Hub</h1>
-        <p class="text-slate-500 text-sm mt-1">Multi-API search pipeline (Hunter.io primary with Snov.io fallback) and CSV exporter.</p>
+        <h1 class="text-3xl font-bold text-slate-900">Snov.io Lead Finder</h1>
+        <p class="text-slate-500 text-sm mt-1">Dedicated lead extraction engine powered by the Snov.io API.</p>
       </div>
       <div class="flex items-center gap-3">
         <button id="clearBtn" onclick="clearAllData()" class="px-3 py-2 text-sm font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition hidden">
@@ -31,57 +31,56 @@
       <!-- Left Panel: API Keys & Inputs -->
       <div class="space-y-6">
         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h2 class="text-lg font-semibold text-slate-900 border-b pb-2">API Provider Keys</h2>
+          <h2 class="text-lg font-semibold text-slate-900 border-b pb-2">Snov.io Credentials</h2>
           
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Hunter.io API Key (Primary)</label>
-            <input type="password" id="hunterKeyInput" placeholder="Enter Hunter Key..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" />
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">API User ID (Client ID)</label>
+            <input type="password" id="snovUserId" placeholder="Enter Snov API User ID..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Snov.io API Key / Token (Fallback)</label>
-            <input type="password" id="snovKeyInput" placeholder="Enter Snov Access Token..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" />
-            <p class="text-[11px] text-slate-400 mt-1">Used if Hunter.io yields no contacts or fails.</p>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">API Secret (Client Secret)</label>
+            <input type="password" id="snovSecret" placeholder="Enter Snov API Secret..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm" />
           </div>
 
           <h2 class="text-lg font-semibold text-slate-900 border-b pb-2 pt-2">Target Input</h2>
 
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Target Company Names / Domains</label>
-            <textarea id="targetList" rows="6" placeholder="Sargento Foods Inc.&#10;Mar-Jac Poultry&#10;target.com" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm font-mono"></textarea>
-            <p class="text-xs text-slate-400 mt-1">Company names or raw domains (one per line). Pre-flight filter will clean and deduplicate.</p>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Target Companies / Domains</label>
+            <textarea id="targetList" rows="6" placeholder="Sargento Foods Inc.&#10;Mar-Jac Poultry&#10;target.com" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm font-mono"></textarea>
+            <p class="text-xs text-slate-400 mt-1">Company names or web domains (one per line). Pre-flight filter will clean formatting.</p>
           </div>
 
-          <button id="searchBtn" onclick="runPipeline()" class="w-full py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition shadow-sm text-sm">
-            Run Search & Append Results
+          <button id="searchBtn" onclick="runPipeline()" class="w-full py-2.5 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition shadow-sm text-sm">
+            Run Snov Search & Append Results
           </button>
         </div>
 
         <!-- Logic Rules Card -->
         <div class="bg-slate-100 p-4 rounded-xl text-xs space-y-2 text-slate-600">
-          <p class="font-semibold text-slate-700">Search & Scoring Pipeline Rules:</p>
+          <p class="font-semibold text-slate-700">Pipeline Execution Rules:</p>
           <ul class="list-disc pl-4 space-y-1">
-            <li><strong>Hunter.io Primary:</strong> Searches Hunter API first for target contacts.</li>
-            <li><strong>Snov.io Fallback:</strong> Automatically queries Snov API if Hunter returns no leads.</li>
-            <li><strong>Generic Filter:</strong> Excludes non-person emails (<code class="bg-slate-200 px-1 rounded">info@</code>, <code class="bg-slate-200 px-1 rounded">sales@</code>, etc.).</li>
-            <li><strong>Role Weighting:</strong> Prioritizes Quality, Food Safety, Compliance, and Data roles over executive titles.</li>
+            <li><strong>OAuth2 Auth:</strong> Automatically exchanges credentials for an active access token.</li>
+            <li><strong>Domain Cleaning:</strong> Converts corporate names to standard root domains.</li>
+            <li><strong>Generic Exclusion:</strong> Filters out non-person emails (<code class="bg-slate-200 px-1 rounded">info@</code>, <code class="bg-slate-200 px-1 rounded">support@</code>, etc.).</li>
+            <li><strong>Role Prioritization:</strong> Ranks Quality, Safety, Compliance, and Analytics roles higher.</li>
           </ul>
         </div>
       </div>
 
-      <!-- Right Panel: Lead Table & Real-Time Progress -->
+      <!-- Right Panel: Data Table & Progress -->
       <div class="lg:col-span-2 space-y-4">
         
         <!-- Status Bar -->
-        <div id="statusCard" class="hidden p-4 rounded-xl border bg-blue-50 border-blue-200 text-blue-800 text-sm flex items-center justify-between">
+        <div id="statusCard" class="hidden p-4 rounded-xl border bg-purple-50 border-purple-200 text-purple-800 text-sm flex items-center justify-between">
           <span id="statusText">Processing targets...</span>
-          <span id="statusCount" class="font-mono text-xs font-semibold bg-blue-100 px-2 py-1 rounded">0/0</span>
+          <span id="statusCount" class="font-mono text-xs font-semibold bg-purple-100 px-2 py-1 rounded">0/0</span>
         </div>
 
         <!-- Master Data Table -->
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="p-4 border-b border-slate-200 flex items-center justify-between">
-            <h2 class="text-base font-semibold text-slate-900">Master Lead List</h2>
+            <h2 class="text-base font-semibold text-slate-900">Snov Master Lead Table</h2>
             <span class="text-xs text-slate-500">Accumulated Total: <strong id="totalCount" class="text-slate-900">0</strong></span>
           </div>
 
@@ -89,17 +88,16 @@
             <table class="w-full text-left border-collapse text-sm">
               <thead>
                 <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider">
-                  <th class="py-3 px-4">Target Company</th>
+                  <th class="py-3 px-4">Target / Domain</th>
                   <th class="py-3 px-4">Name</th>
                   <th class="py-3 px-4">Job Title</th>
                   <th class="py-3 px-4">Email</th>
-                  <th class="py-3 px-4">Source API</th>
                   <th class="py-3 px-4">Confidence</th>
                 </tr>
               </thead>
               <tbody id="leadTableBody" class="divide-y divide-slate-100">
                 <tr id="emptyRow">
-                  <td colspan="6" class="py-8 text-center text-slate-400 text-sm">No contacts discovered yet. Run a search above.</td>
+                  <td colspan="5" class="py-8 text-center text-slate-400 text-sm">No leads discovered yet. Enter credentials and run a search above.</td>
                 </tr>
               </tbody>
             </table>
@@ -130,7 +128,7 @@
 
     const EXECUTIVE_KEYWORDS = ["ceo", "chief", "cto", "cfo", "founder", "co-founder", "president", "vice president", "vp", "executive"];
 
-    // --- PRE-FLIGHT SANITIZER ---
+    // Pre-flight target sanitizer
     function sanitizeTargets(rawInput) {
       const rawLines = rawInput.split("\n");
       const cleanedTargets = [];
@@ -150,6 +148,18 @@
         }
       }
       return cleanedTargets;
+    }
+
+    function targetToDomain(target) {
+      if (target.includes(".") && !target.includes(" ")) {
+        return target.toLowerCase();
+      }
+      const clean = target
+        .toLowerCase()
+        .replace(/\b(inc|llc|corp|corporation|co|company|foods|group|holdings|services|ltd)\b/g, "")
+        .replace(/[^a-z0-9]/g, "")
+        .trim();
+      return clean ? `${clean}.com` : "";
     }
 
     function isGenericEmail(email) {
@@ -182,92 +192,67 @@
       return { score, confidence };
     }
 
-    // --- HUNTER.IO PROVIDER (PRIMARY) ---
-    async function queryHunter(target, apiKey) {
-      const isDomain = target.includes(".") && !target.includes(" ");
-      let endpointsToTry = [];
-
-      if (isDomain) {
-        endpointsToTry.push(`https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(target)}&api_key=${apiKey}&limit=5`);
-      } else {
-        const cleanRoot = target
-          .toLowerCase()
-          .replace(/\b(inc|llc|corp|corporation|co|company|foods|group|holdings|services|ltd)\b/g, "")
-          .replace(/[^a-z0-9]/g, "")
-          .trim();
-
-        if (cleanRoot.length > 2) {
-          endpointsToTry.push(`https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(cleanRoot + ".com")}&api_key=${apiKey}&limit=5`);
-        }
-        endpointsToTry.push(`https://api.hunter.io/v2/domain-search?company=${encodeURIComponent(target)}&api_key=${apiKey}&limit=5`);
-      }
-
-      for (const endpoint of endpointsToTry) {
-        try {
-          const res = await fetch(endpoint);
-          if (res.ok) {
-            const data = await res.json();
-            const emails = data.data?.emails || [];
-            if (emails.length > 0) {
-              return emails.map(item => ({
-                first_name: item.first_name || "Unknown",
-                last_name: item.last_name || "Unknown",
-                job_title: item.position || item.seniority || "N/A",
-                email: item.value,
-                provider: "Hunter.io"
-              }));
-            }
-          }
-        } catch (err) {
-          console.error("Hunter API Error:", err);
-        }
-      }
-      return [];
-    }
-
-    // --- SNOV.IO PROVIDER (FALLBACK) ---
-    async function querySnov(target, apiKey) {
-      const isDomain = target.includes(".") && !target.includes(" ");
-      const cleanDomain = isDomain 
-        ? target 
-        : `${target.toLowerCase().replace(/\b(inc|llc|corp|co|company|foods|ltd)\b/g, "").replace(/[^a-z0-9]/g, "")}.com`;
-
+    // --- SNOV.IO OAUTH TOKEN GENERATOR ---
+    async function getSnovToken(userId, secret) {
       try {
-        const res = await fetch(`https://api.snov.io/v2/domain-emails-with-info?domain=${encodeURIComponent(cleanDomain)}&limit=5`, {
-          headers: { "Authorization": `Bearer ${apiKey}` }
+        const response = await fetch("https://api.snov.io/v1/oauth/access_token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "client_credentials",
+            client_id: userId,
+            client_secret: secret
+          })
         });
 
-        if (res.ok) {
-          const data = await res.json();
+        if (response.ok) {
+          const data = await response.json();
+          return data.access_token || null;
+        }
+      } catch (err) {
+        console.error("Snov.io OAuth Token Error:", err);
+      }
+      return null;
+    }
+
+    // --- SNOV.IO DOMAIN SEARCH QUERY ---
+    async function querySnovDomain(domain, token) {
+      try {
+        const response = await fetch(`https://api.snov.io/v2/domain-emails-with-info?domain=${encodeURIComponent(domain)}&limit=10`, {
+          method: "GET",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
           const emails = data.emails || [];
           return emails.map(item => ({
             first_name: item.first_name || "Unknown",
             last_name: item.last_name || "Unknown",
             job_title: item.position || "N/A",
-            email: item.email,
-            provider: "Snov.io"
+            email: item.email
           }));
         }
       } catch (err) {
-        console.error("Snov API Error:", err);
+        console.error("Snov.io Domain Search Error:", err);
       }
       return [];
     }
 
     // --- PIPELINE EXECUTION ---
     async function runPipeline() {
-      const hunterKey = document.getElementById("hunterKeyInput").value.trim();
-      const snovKey = document.getElementById("snovKeyInput").value.trim();
+      const userId = document.getElementById("snovUserId").value.trim();
+      const secret = document.getElementById("snovSecret").value.trim();
       const rawTargets = document.getElementById("targetList").value.trim();
 
-      if (!hunterKey && !snovKey) {
-        alert("Please enter at least one API key (Hunter.io or Snov.io).");
+      if (!userId || !secret) {
+        alert("Please enter both your Snov.io API User ID and API Secret.");
         return;
       }
 
       const targets = sanitizeTargets(rawTargets);
       if (targets.length === 0) {
-        alert("Please enter at least one target company or domain.");
+        alert("Please enter at least one target company name or domain.");
         return;
       }
 
@@ -282,27 +267,28 @@
       searchBtn.disabled = true;
       searchBtn.classList.add("opacity-50");
 
+      statusText.innerText = "Authenticating with Snov.io...";
+      const token = await getSnovToken(userId, secret);
+
+      if (!token) {
+        alert("Snov.io Authentication Failed. Please verify your API User ID and API Secret.");
+        searchBtn.disabled = false;
+        searchBtn.classList.remove("opacity-50");
+        statusCard.classList.add("hidden");
+        return;
+      }
+
       let addedInThisRun = 0;
 
       for (let i = 0; i < targets.length; i++) {
         const target = targets[i];
-        statusText.innerText = `Searching Hunter.io for '${target}'...`;
+        const domain = targetToDomain(target);
+
+        statusText.innerText = `Searching Snov.io for '${domain}'...`;
         statusCount.innerText = `${i + 1}/${targets.length}`;
 
-        let rawContacts = [];
+        const rawContacts = await querySnovDomain(domain, token);
 
-        // 1. Try Hunter.io First
-        if (hunterKey) {
-          rawContacts = await queryHunter(target, hunterKey);
-        }
-
-        // 2. Fallback to Snov.io if Hunter yielded no contacts
-        if (rawContacts.length === 0 && snovKey) {
-          statusText.innerText = `Hunter yielded no results. Trying Snov.io for '${target}'...`;
-          rawContacts = await querySnov(target, snovKey);
-        }
-
-        // 3. Filter generic emails and score titles
         const validContacts = [];
         for (const item of rawContacts) {
           if (isGenericEmail(item.email)) continue;
@@ -315,13 +301,11 @@
             job_title: item.job_title,
             email: item.email,
             score: evalResult.score,
-            confidence: evalResult.confidence,
-            provider: item.provider
+            confidence: evalResult.confidence
           });
         }
 
         if (validContacts.length > 0) {
-          // Sort by highest job title score
           validContacts.sort((a, b) => b.score - a.score);
           const bestContact = validContacts[0];
           const emailKey = bestContact.email.toLowerCase();
@@ -337,7 +321,7 @@
         await new Promise(r => setTimeout(r, 200));
       }
 
-      statusText.innerText = `Pipeline complete! Added ${addedInThisRun} lead(s).`;
+      statusText.innerText = `Search complete! Added ${addedInThisRun} new Snov lead(s).`;
       searchBtn.disabled = false;
       searchBtn.classList.remove("opacity-50");
       updateUI();
@@ -366,12 +350,7 @@
         <td class="py-3 px-4 font-mono text-xs text-slate-600">${escapeHtml(lead.target_company)}</td>
         <td class="py-3 px-4 font-medium text-slate-900">${escapeHtml(lead.first_name)} ${escapeHtml(lead.last_name)}</td>
         <td class="py-3 px-4 text-slate-600">${escapeHtml(lead.job_title)}</td>
-        <td class="py-3 px-4 font-mono text-xs text-blue-600">${escapeHtml(lead.email)}</td>
-        <td class="py-3 px-4">
-          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-            ${escapeHtml(lead.provider)}
-          </span>
-        </td>
+        <td class="py-3 px-4 font-mono text-xs text-purple-600">${escapeHtml(lead.email)}</td>
         <td class="py-3 px-4">${confidenceBadge}</td>
       `;
       tbody.appendChild(tr);
@@ -395,12 +374,12 @@
     }
 
     function clearAllData() {
-      if (confirm("Are you sure you want to clear all accumulated leads from this session?")) {
+      if (confirm("Are you sure you want to clear all accumulated Snov leads?")) {
         masterLeads = [];
         seenEmails.clear();
         document.getElementById("leadTableBody").innerHTML = `
           <tr id="emptyRow">
-            <td colspan="6" class="py-8 text-center text-slate-400 text-sm">No contacts discovered yet. Run a search above.</td>
+            <td colspan="5" class="py-8 text-center text-slate-400 text-sm">No leads discovered yet. Enter credentials and run a search above.</td>
           </tr>
         `;
         document.getElementById("statusCard").classList.add("hidden");
@@ -408,11 +387,10 @@
       }
     }
 
-    // --- MASS CSV EXPORT & APPEND SYSTEM ---
     function exportToCSV() {
       if (masterLeads.length === 0) return;
 
-      const headers = ["target_company", "first_name", "last_name", "job_title", "email", "provider", "confidence_level"];
+      const headers = ["target_company", "first_name", "last_name", "job_title", "email", "confidence_level"];
       let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
 
       masterLeads.forEach(lead => {
@@ -422,7 +400,6 @@
           `"${lead.last_name.replace(/"/g, '""')}"`,
           `"${lead.job_title.replace(/"/g, '""')}"`,
           `"${lead.email.replace(/"/g, '""')}"`,
-          `"${lead.provider.replace(/"/g, '""')}"`,
           `"${lead.confidence.replace(/"/g, '""')}"`
         ];
         csvContent += row.join(",") + "\n";
@@ -431,7 +408,7 @@
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `master_leads_export_${new Date().toISOString().slice(0,10)}.csv`);
+      link.setAttribute("download", `snov_master_leads_${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
