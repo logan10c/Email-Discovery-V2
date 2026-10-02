@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Snov.io Email Discovery Hub</title>
+  <title>Snov.io Lead Finder</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
@@ -12,8 +12,8 @@
     <!-- Header -->
     <header class="mb-8 border-b pb-4 border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">Snov.io Email Discovery Hub</h1>
-        <p class="text-slate-500 text-sm mt-1">Automated contact finder powered strictly by Snov.io API with custom title scoring.</p>
+        <h1 class="text-3xl font-bold text-slate-900">Snov.io Lead Finder</h1>
+        <p class="text-slate-500 text-sm mt-1">Dedicated lead extraction engine powered strictly by the Snov.io API.</p>
       </div>
       <div class="flex items-center gap-3">
         <button id="clearBtn" onclick="clearAllData()" class="px-3 py-2 text-sm font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition hidden">
@@ -28,10 +28,10 @@
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       
-      <!-- Left Panel: API Keys & Inputs -->
+      <!-- Left Panel: Snov.io Inputs Only -->
       <div class="space-y-6">
         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h2 class="text-lg font-semibold text-slate-900 border-b pb-2">Snov.io API Keys</h2>
+          <h2 class="text-lg font-semibold text-slate-900 border-b pb-2">Snov.io Credentials</h2>
           
           <div>
             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">API User ID (Client ID)</label>
@@ -48,7 +48,7 @@
           <div>
             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Target Companies / Domains</label>
             <textarea id="targetList" rows="6" placeholder="Sargento Foods Inc.&#10;Mar-Jac Poultry&#10;target.com" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm font-mono"></textarea>
-            <p class="text-xs text-slate-400 mt-1">Enter company names or web domains (one per line). Formatting is auto-cleaned.</p>
+            <p class="text-xs text-slate-400 mt-1">Enter company names or web domains (one per line).</p>
           </div>
 
           <button id="searchBtn" onclick="runPipeline()" class="w-full py-2.5 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition shadow-sm text-sm">
@@ -56,19 +56,18 @@
           </button>
         </div>
 
-        <!-- Logic Rules Card -->
+        <!-- Pipeline Rules Card -->
         <div class="bg-slate-100 p-4 rounded-xl text-xs space-y-2 text-slate-600">
-          <p class="font-semibold text-slate-700">Search Engine Pipeline Rules:</p>
+          <p class="font-semibold text-slate-700">Search Pipeline Rules:</p>
           <ul class="list-disc pl-4 space-y-1">
-            <li><strong>OAuth2 Authentication:</strong> Uses API Client ID/Secret to generate temporary access tokens.</li>
-            <li><strong>Generic Filter:</strong> Automatically removes non-person contacts (<code class="bg-slate-200 px-1 rounded">info@</code>, <code class="bg-slate-200 px-1 rounded">sales@</code>, etc.).</li>
-            <li><strong>Title Scoring:</strong> Prioritizes Quality, Food Safety, Compliance, and Data roles over executive titles.</li>
-            <li><strong>Deduplication:</strong> Prevents duplicate email records across multiple searches.</li>
+            <li><strong>OAuth2 Auth:</strong> Uses Snov API Client ID/Secret to generate access tokens.</li>
+            <li><strong>Generic Exclusion:</strong> Removes non-person emails (<code class="bg-slate-200 px-1 rounded">info@</code>, <code class="bg-slate-200 px-1 rounded">sales@</code>, etc.).</li>
+            <li><strong>Title Scoring:</strong> Ranks Quality, Safety, Compliance, and Data roles higher.</li>
           </ul>
         </div>
       </div>
 
-      <!-- Right Panel: Data Table & Real-Time Progress -->
+      <!-- Right Panel: Lead Table & Real-Time Progress -->
       <div class="lg:col-span-2 space-y-4">
         
         <!-- Status Bar -->
@@ -109,7 +108,6 @@
   </div>
 
   <script>
-    // --- ACCUMULATIVE GLOBAL STATE ---
     let masterLeads = [];
     let seenEmails = new Set();
 
@@ -128,7 +126,6 @@
 
     const EXECUTIVE_KEYWORDS = ["ceo", "chief", "cto", "cfo", "founder", "co-founder", "president", "vice president", "vp", "executive"];
 
-    // Input sanitizer
     function sanitizeTargets(rawInput) {
       const rawLines = rawInput.split("\n");
       const cleanedTargets = [];
@@ -192,7 +189,6 @@
       return { score, confidence };
     }
 
-    // --- SNOV.IO OAUTH TOKEN GENERATOR ---
     async function getSnovToken(userId, secret) {
       try {
         const response = await fetch("https://api.snov.io/v1/oauth/access_token", {
@@ -210,12 +206,11 @@
           return data.access_token || null;
         }
       } catch (err) {
-        console.error("Snov.io Auth Error:", err);
+        console.error("Snov Auth Error:", err);
       }
       return null;
     }
 
-    // --- SNOV.IO DOMAIN EMAIL QUERY ---
     async function querySnovDomain(domain, token) {
       try {
         const response = await fetch(`https://api.snov.io/v2/domain-emails-with-info?domain=${encodeURIComponent(domain)}&limit=10`, {
@@ -234,12 +229,11 @@
           }));
         }
       } catch (err) {
-        console.error("Snov.io Fetch Error:", err);
+        console.error("Snov Fetch Error:", err);
       }
       return [];
     }
 
-    // --- PIPELINE EXECUTION ---
     async function runPipeline() {
       const userId = document.getElementById("snovUserId").value.trim();
       const secret = document.getElementById("snovSecret").value.trim();
@@ -271,7 +265,7 @@
       const token = await getSnovToken(userId, secret);
 
       if (!token) {
-        alert("Snov.io Authentication Failed. Please check your API User ID and Secret.");
+        alert("Snov.io Authentication Failed. Please verify your User ID and Secret.");
         searchBtn.disabled = false;
         searchBtn.classList.remove("opacity-50");
         statusCard.classList.add("hidden");
@@ -321,7 +315,7 @@
         await new Promise(r => setTimeout(r, 200));
       }
 
-      statusText.innerText = `Pipeline complete! Added ${addedInThisRun} lead(s).`;
+      statusText.innerText = `Search complete! Added ${addedInThisRun} new lead(s).`;
       searchBtn.disabled = false;
       searchBtn.classList.remove("opacity-50");
       updateUI();
@@ -374,7 +368,7 @@
     }
 
     function clearAllData() {
-      if (confirm("Are you sure you want to clear all accumulated Snov leads?")) {
+      if (confirm("Are you sure you want to clear all accumulated leads?")) {
         masterLeads = [];
         seenEmails.clear();
         document.getElementById("leadTableBody").innerHTML = `
@@ -387,7 +381,6 @@
       }
     }
 
-    // CSV Exporter & Append Handler
     function exportToCSV() {
       if (masterLeads.length === 0) return;
 
@@ -418,6 +411,9 @@
     function escapeHtml(str) {
       return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
     }
+  </script>
+</body>
+</html>
   </script>
 </body>
 </html>
